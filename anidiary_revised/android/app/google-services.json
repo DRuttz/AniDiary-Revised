@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "935646886754",
+    "firebase_url": "https://anidiary-2f59b-default-rtdb.firebaseio.com",
+    "project_id": "anidiary-2f59b",
+    "storage_bucket": "anidiary-2f59b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:935646886754:android:8e39f4bcbbbca8a9274a3b",
+        "android_client_info": {
+          "package_name": "com.example.anidiary_revised"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "935646886754-mq7dni9f2diqlgufdli2j49vg0uq9ar4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCB_1EPo99JKXV2ZxpKF3Xyv-24nmmSRLw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "935646886754-mq7dni9f2diqlgufdli2j49vg0uq9ar4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
