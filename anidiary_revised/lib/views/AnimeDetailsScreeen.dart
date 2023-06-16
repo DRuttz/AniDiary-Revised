@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, library_private_types_in_public_api, use_build_context_synchronously
 
+import 'package:anidiary_revised/views/AnimeDetailsWithRemoveScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anidiary_revised/auth_service.dart';
@@ -87,6 +88,14 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Anime added to watchlist.'),
+                      ),
+                    );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AnimeDetailsWithRemoveScreen(
+                          animeData: widget.animeData,
+                        ),
                       ),
                     );
                   }

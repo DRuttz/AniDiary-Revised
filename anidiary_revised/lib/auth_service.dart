@@ -119,12 +119,6 @@ class AuthService {
     return null;
   }
 
-  Future<void> saveLoginInfo(String email, String password) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('email', email);
-    await prefs.setString('password', password);
-  }
-
   Future<String?> login({
     required String email,
     required String password,
@@ -134,8 +128,6 @@ class AuthService {
         email: email,
         password: password,
       );
-
-      await saveLoginInfo(email, password);
 
       return 'Success';
     } on FirebaseAuthException catch (e) {

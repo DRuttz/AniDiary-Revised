@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, prefer_const_constructors
-
 import 'create_account.dart';
 import 'package:flutter/material.dart';
 import 'home.dart';
@@ -23,22 +21,63 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     initSharedPreferences().then((_) {
-      retrieveLoginInfo();
-    }); // Call the initialization method
+      checkLoginStatus();
+    });
   }
 
-  // Initialize SharedPreferences
   Future<void> initSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  // Retrieve and populate the saved login information
-  void retrieveLoginInfo() {
-    final email = _prefs?.getString('email');
-    final password = _prefs?.getString('password');
-    if (email != null && password != null) {
-      _emailController.text = email;
-      _passwordController.text = password;
+  void checkLoginStatus() {
+    final isLoggedIn = _prefs?.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      navigateToHome();
+    }
+  }
+
+  Future<void> saveLoginStatus(bool isLoggedIn) async {
+    await _prefs?.setBool('isLoggedIn', isLoggedIn);
+  }
+
+  Future<void> loginUser() async {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      await saveLoginStatus(true);
+      navigateToHome();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed: $e'),
+        ),
+      );
+    }
+  }
+
+  Future<void> navigateToHome() async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      List<String> watchlist = await getWatchlist(userId);
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => home(watchlist: watchlist),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              const Text('An error occurred while accessing the watchlist.'),
+        ),
+      );
     }
   }
 
@@ -47,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final watchlist = await AuthService().getWatchlist(userId);
       return watchlist;
     } catch (e) {
-      return []; // Return an empty list on error
+      return [];
     }
   }
 
@@ -86,36 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 30.0,
             ),
             ElevatedButton(
-              onPressed: () async {
-                final message = await AuthService().login(
-                  email: _emailController.text,
-                  password: _passwordController.text,
-                );
-                if (message!.contains('Success')) {
-                  try {
-                    String userId = FirebaseAuth.instance.currentUser!.uid;
-                    List<String> watchlist = await getWatchlist(userId);
-
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => home(watchlist: watchlist),
-                      ),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                            'An error occurred while accessing the watchlist.'),
-                      ),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(message),
-                    ),
-                  );
-                }
+              onPressed: () {
+                loginUser();
               },
               child: const Text('Login'),
             ),

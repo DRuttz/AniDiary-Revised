@@ -37,6 +37,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   Widget build(BuildContext context) {
     final User? currentUser = FirebaseAuth.instance.currentUser;
+    final String conversationId =
+        _generateConversationId(currentUser!.uid, widget.friendId);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.friendName),
@@ -45,44 +48,49 @@ class _ConversationScreenState extends State<ConversationScreen> {
         children: [
           Expanded(
             child: Align(
-              alignment: Alignment.bottomCenter,
-              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: _messagesCollection.orderBy('timestamp').snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
+                alignment: Alignment.bottomCenter,
+                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance
+                      .collection('conversations')
+                      .doc(conversationId)
+                      .collection('messages')
+                      .orderBy('timestamp')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
 
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
 
-                  final messages = snapshot.data?.docs ?? [];
+                    final messages = snapshot.data?.docs ?? [];
 
-                  return ListView.builder(
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index].data();
+                    return ListView.builder(
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index].data();
 
-                      final messageText = message['message'] ?? '';
-                      final timestamp = message['timestamp'] as Timestamp?;
+                        final messageText = message['message'] ?? '';
+                        final timestamp = message['timestamp'] as Timestamp?;
+                        final senderId = message['senderId'] ?? '';
 
-                      final formattedTime =
-                          timestamp != null ? _formatTimestamp(timestamp) : '';
+                        final formattedTime = timestamp != null
+                            ? _formatTimestamp(timestamp)
+                            : '';
 
-                      final senderId = message['senderId'] ?? '';
-                      final isMe = currentUser?.uid == senderId;
+                        final isMe = currentUser?.uid == senderId;
 
-                      return MessageBubble(
-                        message: messageText,
-                        formattedTime: formattedTime, // Pass the formatted time
-                        isMe: isMe,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+                        return MessageBubble(
+                          message: messageText,
+                          formattedTime: formattedTime,
+                          isMe: isMe,
+                        );
+                      },
+                    );
+                  },
+                )),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -117,8 +125,15 @@ class _ConversationScreenState extends State<ConversationScreen> {
       final messageText = _messageController.text.trim();
 
       if (messageText.isNotEmpty) {
-        _messagesCollection.add({
-          'senderId': senderId, // Include the senderId in the message data
+        final conversationId =
+            _generateConversationId(currentUser.uid, widget.friendId);
+
+        FirebaseFirestore.instance
+            .collection('conversations')
+            .doc(conversationId)
+            .collection('messages')
+            .add({
+          'senderId': senderId,
           'message': messageText,
           'timestamp': FieldValue.serverTimestamp(),
         });
@@ -126,6 +141,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
         _messageController.clear();
       }
     }
+  }
+
+  String _generateConversationId(String currentUserId, String friendId) {
+    final List<String> ids = [currentUserId, friendId];
+    ids.sort(); // Sort the IDs to ensure consistent conversation ID generation
+    return ids.join('_');
   }
 
   String _formatTimestamp(Timestamp timestamp) {

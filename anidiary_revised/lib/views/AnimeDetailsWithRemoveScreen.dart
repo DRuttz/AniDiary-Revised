@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anidiary_revised/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'AnimeDetailsScreeen.dart';
 
 class AnimeDetailsWithRemoveScreen extends StatefulWidget {
   final Map<String, dynamic> animeData;
@@ -110,6 +111,14 @@ class _AnimeDetailsWithRemoveScreenState
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Anime removed from watchlist.'),
+                      ),
+                    );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AnimeDetailsScreen(
+                          animeData: widget.animeData,
+                        ),
                       ),
                     );
                   }
