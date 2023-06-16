@@ -3,6 +3,7 @@
 import 'package:anidiary_revised/views/HomeScreen.dart';
 import 'package:flutter/material.dart';
 import 'BrowseScreen.dart';
+import 'ProfileScreen.dart';
 
 class home extends StatefulWidget {
   final List<String> watchlist;
@@ -18,14 +19,13 @@ class _homeState extends State<home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('App Title'),
-      ),
+      appBar: AppBar(title: const Text('AniDiary'), centerTitle: true),
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
           HomeScreen(),
           BrowseScreen(),
+          ProfileScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -44,6 +44,10 @@ class _homeState extends State<home> {
             icon: Icon(Icons.book),
             label: 'Browse',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message_rounded),
+            label: 'Social',
+          )
         ],
       ),
     );
