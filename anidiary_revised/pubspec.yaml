@@ -45,6 +45,7 @@ dependencies:
   dart_jsonwebtoken: ^2.8.0
   jwt_decode: ^0.3.1
   jwt_decoder: ^2.0.1
+  firebase_database: ^10.2.3
 
 dev_dependencies:
   flutter_test:

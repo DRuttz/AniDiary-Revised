@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anidiary_revised/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'AnimeDetailsScreeen.dart';
+import 'package:anidiary_revised/recommendation_stream.dart';
 
 class AnimeDetailsWithRemoveScreen extends StatefulWidget {
   final Map<String, dynamic> animeData;
@@ -113,6 +114,7 @@ class _AnimeDetailsWithRemoveScreenState
                         content: Text('Anime removed from watchlist.'),
                       ),
                     );
+                    RecommendationStream.updateRecommendedAnime();
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

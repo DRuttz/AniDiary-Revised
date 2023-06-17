@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anidiary_revised/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:anidiary_revised/recommendation_stream.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> animeData;
@@ -90,6 +91,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                         content: Text('Anime added to watchlist.'),
                       ),
                     );
+                    RecommendationStream.updateRecommendedAnime();
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

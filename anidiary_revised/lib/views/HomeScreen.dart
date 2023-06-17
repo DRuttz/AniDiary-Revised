@@ -1,10 +1,12 @@
-import 'package:anidiary_revised/views/AnimeDetailsWithRemoveScreen.dart';
+// ignore_for_file: file_names, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:anidiary_revised/auth_service.dart';
+import 'AnimeDetailsWithRemoveScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,7 +16,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Stream<List<String>>? watchlistStream;
   List<Map<String, dynamic>> animeDetails = [];
   List<bool> expansionStateList = []; // Track expansion state for each anime
   int expandedIndex = -1; // Track the currently expanded anime index
@@ -25,7 +26,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userId = user.uid;
-      watchlistStream = AuthService().getWatchlistStream(userId);
+      final watchlistStream = AuthService().getWatchlistStream(userId);
+
+      watchlistStream.listen((watchlist) {
+        fetchAnimeDetails(watchlist);
+      });
     }
   }
 
@@ -34,11 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
     List<bool> expansionState = [];
     for (String animeId in watchlist) {
       final animeDetail = await getAnimeDetails(animeId);
-      if (animeDetail != null) {
-        details.add(animeDetail);
-        expansionState
-            .add(false); // Initialize expansion state as false for each anime
-      }
+      details.add(animeDetail);
+      expansionState.add(false);
     }
     // Collapse the expanded anime if it is removed from the watchlist
     if (expandedIndex >= details.length) {
@@ -90,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (BuildContext context) {
         int newValue = episodesWatched;
         return AlertDialog(
-          title: Text('Adjust Episodes Watched'),
+          title: const Text('Adjust Episodes Watched'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -111,13 +113,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 saveEpisodesWatched(animeId, newValue);
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -137,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void updateAnimeDetails(
       List<Map<String, dynamic>> details, List<bool> expansionState) {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         animeDetails = details;
         expansionStateList = expansionState;
@@ -147,6 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid ?? ''; // Provide a default value if userId is null
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -162,13 +167,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             StreamBuilder<List<String>>(
-              stream: watchlistStream,
+              stream: AuthService().getWatchlistStream(userId),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final watchlist = snapshot.data!;
                   if (animeDetails.isEmpty) {
-                    fetchAnimeDetails(
-                        watchlist); // Fetch anime details using watchlist
+                    fetchAnimeDetails(watchlist);
                   }
 
                   return Expanded(
@@ -305,8 +309,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                           'id'],
                                                                       episodesWatched);
                                                                 },
-                                                                child: Icon(Icons
-                                                                    .remove),
+                                                                child: const Icon(
+                                                                    Icons
+                                                                        .remove),
                                                               ),
                                                               const SizedBox(
                                                                   width: 8),
@@ -324,14 +329,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                           'id'],
                                                                       episodesWatched);
                                                                 },
-                                                                child: Icon(
+                                                                child: const Icon(
                                                                     Icons.add),
                                                               ),
                                                             ],
                                                           ),
                                                         ],
                                                       )
-                                                    : Text(
+                                                    : const Text(
                                                         'Total episodes unknown'),
                                               ],
                                             );

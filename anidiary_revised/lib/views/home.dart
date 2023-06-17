@@ -7,6 +7,7 @@ import 'ProfileScreen.dart';
 
 class home extends StatefulWidget {
   final List<String> watchlist;
+
   const home({Key? key, required this.watchlist}) : super(key: key);
 
   @override

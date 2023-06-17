@@ -18,17 +18,12 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _messageController = TextEditingController();
-  late CollectionReference<Map<String, dynamic>> _messagesCollection;
 
   @override
   void initState() {
     super.initState();
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null && widget.friendId.isNotEmpty) {
-      _messagesCollection = FirebaseFirestore.instance
-          .collection('conversations')
-          .doc(currentUser.uid)
-          .collection(widget.friendId);
     } else {
       throw Exception('Invalid friendId or currentUser is null');
     }
@@ -80,7 +75,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                             ? _formatTimestamp(timestamp)
                             : '';
 
-                        final isMe = currentUser?.uid == senderId;
+                        final isMe = currentUser.uid == senderId;
 
                         return MessageBubble(
                           message: messageText,
